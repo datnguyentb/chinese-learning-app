@@ -1,10 +1,11 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { findTopic, words } from "../data/curriculum";
 import { HSK_LEVELS, hskByLevel, quizSense, type HskLevel } from "../data/hsk";
 import { buildQuiz, type QuizQuestion, type QuizWord } from "../lib/quiz";
 import { Pinyin } from "../lib/pinyin";
 import { useProgress } from "../lib/progress";
 import { playCorrect } from "../lib/sound";
+import { speakOnce } from "../lib/speech";
 import { SpeakButton } from "./SpeakButton";
 
 function poolFor(topicId?: string, hsk?: number): { pool: QuizWord[]; label: string; missing: boolean } {
@@ -43,6 +44,12 @@ export function Quiz({
   const [phase, setPhase] = useState<"ask" | "result">("ask");
   const [showPinyin, setShowPinyin] = useState(true);
   const savedRef = useRef(false);
+  const question = missing ? undefined : questions[step];
+
+  useEffect(() => {
+    if (phase !== "ask" || !question || question.mode !== "hanzi-to-vi") return;
+    speakOnce(question.word.hanzi);
+  }, [phase, step, question]);
 
   if (missing) {
     return (
@@ -52,7 +59,6 @@ export function Quiz({
     );
   }
 
-  const question = questions[step];
   const correctCount = log.filter((item) => item.ok).length;
 
   function choose(choice: string) {

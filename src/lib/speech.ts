@@ -1,3 +1,12 @@
+let lastAuto = { text: "", at: 0 };
+
+export function speakOnce(text: string) {
+  const now = Date.now();
+  if (lastAuto.text === text && now - lastAuto.at < 500) return true;
+  lastAuto = { text, at: now };
+  return speakChinese(text);
+}
+
 export function speakChinese(text: string) {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) return false;
   try {

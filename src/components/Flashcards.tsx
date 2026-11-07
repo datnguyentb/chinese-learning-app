@@ -4,6 +4,7 @@ import { HSK_LEVELS, hskByLevel, quizSense, type HskLevel } from "../data/hsk";
 import { shuffle } from "../lib/quiz";
 import { Pinyin } from "../lib/pinyin";
 import { useProgress } from "../lib/progress";
+import { speakOnce } from "../lib/speech";
 import { SpeakButton } from "./SpeakButton";
 
 type CardWord = {
@@ -97,6 +98,11 @@ export function Flashcards({ hsk, onQuiz }: { hsk?: number; onQuiz: (level?: num
   }, []);
 
   const word = deck[index];
+
+  useEffect(() => {
+    if (done || front !== "hanzi" || !word) return;
+    speakOnce(word.hanzi);
+  }, [word?.id, front, done]);
 
   return (
     <div className="page">

@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toneSamples, toneSets, type ToneNumber, type ToneSample } from "../data/tones";
 import { shuffle } from "../lib/quiz";
 import { Pinyin } from "../lib/pinyin";
 import { useProgress } from "../lib/progress";
 import { playCorrect } from "../lib/sound";
-import { speakChinese } from "../lib/speech";
+import { speakChinese, speakOnce } from "../lib/speech";
 import { SpeakButton } from "./SpeakButton";
 
 const TONE_KEYS: { tone: ToneNumber; label: string; hint: string }[] = [
@@ -72,6 +72,11 @@ export function Tones() {
   function play(text: string) {
     setSpeechError(speakChinese(text) ? "" : "Trình duyệt này không đọc được tiếng Trung.");
   }
+
+  useEffect(() => {
+    if (finished || !current) return;
+    setSpeechError(speakOnce(current.hanzi) ? "" : "Trình duyệt này không đọc được tiếng Trung.");
+  }, [finished, step, current]);
 
   function choose(tone: ToneNumber) {
     if (chosen !== null || finished) return;
@@ -188,7 +193,7 @@ export function Tones() {
               </span>
               Nghe âm
             </button>
-            <p className="muted">Chưa hiện chữ. Hãy nghe trước, rồi chọn thanh.</p>
+            <p className="muted">Chữ chưa hiện. Âm vừa tự đọc. Bấm Nghe âm nếu muốn nghe lại.</p>
             {speechError ? <p className="speak-error">{speechError}</p> : null}
             <div className="tone-keys">
               {TONE_KEYS.map((item) => {

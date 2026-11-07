@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { findTopic, topicNumber } from "../data/curriculum";
 import { Pinyin, ToneLegend } from "../lib/pinyin";
 import { useProgress } from "../lib/progress";
+import { speakOnce } from "../lib/speech";
 import { SpeakButton } from "./SpeakButton";
 
 export function Lesson({
@@ -19,8 +20,13 @@ export function Lesson({
   const { isKnown, mark } = useProgress();
   const start = topic && wordId ? topic.words.findIndex((word) => word.id === wordId) : 0;
   const [index, setIndex] = useState(start >= 0 ? start : 0);
+  const word = topic?.words[index];
 
-  if (!topic) {
+  useEffect(() => {
+    if (word) speakOnce(word.hanzi);
+  }, [word?.id]);
+
+  if (!topic || !word) {
     return (
       <div className="page">
         <button type="button" className="back" onClick={onBack}>
@@ -31,7 +37,6 @@ export function Lesson({
     );
   }
 
-  const word = topic.words[index];
   const known = isKnown(word.id);
   const number = String(topicNumber(topic.id)).padStart(2, "0");
 
